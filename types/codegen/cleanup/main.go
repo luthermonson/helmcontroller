@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/rancher/norman/generator/cleanup"
+	"github.com/rancher/wrangler/pkg/cleanup"
 	"github.com/sirupsen/logrus"
 )
 
