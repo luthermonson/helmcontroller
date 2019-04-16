@@ -23,9 +23,9 @@ import (
 	sync "sync"
 	time "time"
 
-	versioned "github.com/luthermonson/helmcontroller/pkg/generated/clientset/versioned"
-	helmcattleio "github.com/luthermonson/helmcontroller/pkg/generated/informers/externalversions/helm.cattle.io"
-	internalinterfaces "github.com/luthermonson/helmcontroller/pkg/generated/informers/externalversions/internalinterfaces"
+	versioned "github.com/rancher/helmcontroller/pkg/generated/clientset/versioned"
+	helmcattleio "github.com/rancher/helmcontroller/pkg/generated/informers/externalversions/helm.cattle.io"
+	internalinterfaces "github.com/rancher/helmcontroller/pkg/generated/informers/externalversions/internalinterfaces"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

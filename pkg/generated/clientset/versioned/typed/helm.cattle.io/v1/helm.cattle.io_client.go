@@ -19,8 +19,8 @@ limitations under the License.
 package v1
 
 import (
-	"github.com/luthermonson/helmcontroller/pkg/generated/clientset/versioned/scheme"
-	v1 "github.com/luthermonson/helmcontroller/types/apis/helm.cattle.io/v1"
+	"github.com/rancher/helmcontroller/pkg/generated/clientset/versioned/scheme"
+	v1 "github.com/rancher/helmcontroller/types/apis/helm.cattle.io/v1"
 	serializer "k8s.io/apimachinery/pkg/runtime/serializer"
 	rest "k8s.io/client-go/rest"
 )
@@ -35,8 +35,8 @@ type HelmV1Client struct {
 	restClient rest.Interface
 }
 
-func (c *HelmV1Client) HelmCharts() HelmChartInterface {
-	return newHelmCharts(c)
+func (c *HelmV1Client) HelmCharts(namespace string) HelmChartInterface {
+	return newHelmCharts(c, namespace)
 }
 
 // NewForConfig creates a new HelmV1Client for the given config.

@@ -19,7 +19,7 @@ limitations under the License.
 package v1
 
 import (
-	internalinterfaces "github.com/luthermonson/helmcontroller/pkg/generated/informers/externalversions/internalinterfaces"
+	internalinterfaces "github.com/rancher/helmcontroller/pkg/generated/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to all the informers in this group version.
@@ -41,5 +41,5 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 
 // HelmCharts returns a HelmChartInformer.
 func (v *version) HelmCharts() HelmChartInformer {
-	return &helmChartInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
+	return &helmChartInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }

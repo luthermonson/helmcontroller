@@ -21,10 +21,10 @@ package v1
 import (
 	"context"
 
-	clientset "github.com/luthermonson/helmcontroller/pkg/generated/clientset/versioned/typed/helm.cattle.io/v1"
-	informers "github.com/luthermonson/helmcontroller/pkg/generated/informers/externalversions/helm.cattle.io/v1"
-	listers "github.com/luthermonson/helmcontroller/pkg/generated/listers/helm.cattle.io/v1"
-	v1 "github.com/luthermonson/helmcontroller/types/apis/helm.cattle.io/v1"
+	clientset "github.com/rancher/helmcontroller/pkg/generated/clientset/versioned/typed/helm.cattle.io/v1"
+	informers "github.com/rancher/helmcontroller/pkg/generated/informers/externalversions/helm.cattle.io/v1"
+	listers "github.com/rancher/helmcontroller/pkg/generated/listers/helm.cattle.io/v1"
+	v1 "github.com/rancher/helmcontroller/types/apis/helm.cattle.io/v1"
 	"github.com/rancher/wrangler/pkg/generic"
 	"k8s.io/apimachinery/pkg/api/equality"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -44,7 +44,7 @@ type HelmChartController interface {
 
 	OnChange(ctx context.Context, name string, sync HelmChartHandler)
 	OnRemove(ctx context.Context, name string, sync HelmChartHandler)
-	Enqueue(name string)
+	Enqueue(namespace, name string)
 
 	Cache() HelmChartCache
 
@@ -60,16 +60,16 @@ type HelmChartClient interface {
 	Create(*v1.HelmChart) (*v1.HelmChart, error)
 	Update(*v1.HelmChart) (*v1.HelmChart, error)
 	UpdateStatus(*v1.HelmChart) (*v1.HelmChart, error)
-	Delete(name string, options *metav1.DeleteOptions) error
-	Get(name string, options metav1.GetOptions) (*v1.HelmChart, error)
-	List(opts metav1.ListOptions) (*v1.HelmChartList, error)
-	Watch(opts metav1.ListOptions) (watch.Interface, error)
-	Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1.HelmChart, err error)
+	Delete(namespace, name string, options *metav1.DeleteOptions) error
+	Get(namespace, name string, options metav1.GetOptions) (*v1.HelmChart, error)
+	List(namespace string, opts metav1.ListOptions) (*v1.HelmChartList, error)
+	Watch(namespace string, opts metav1.ListOptions) (watch.Interface, error)
+	Patch(namespace, name string, pt types.PatchType, data []byte, subresources ...string) (result *v1.HelmChart, err error)
 }
 
 type HelmChartCache interface {
-	Get(name string) (*v1.HelmChart, error)
-	List(selector labels.Selector) ([]*v1.HelmChart, error)
+	Get(namespace, name string) (*v1.HelmChart, error)
+	List(namespace string, selector labels.Selector) ([]*v1.HelmChart, error)
 
 	AddIndexer(indexName string, indexer HelmChartIndexer)
 	GetByIndex(indexName, key string) ([]*v1.HelmChart, error)
@@ -158,8 +158,8 @@ func (c *helmChartController) OnRemove(ctx context.Context, name string, sync He
 	c.AddGenericHandler(ctx, name, removeHandler)
 }
 
-func (c *helmChartController) Enqueue(name string) {
-	c.controllerManager.Enqueue(c.gvk, "", name)
+func (c *helmChartController) Enqueue(namespace, name string) {
+	c.controllerManager.Enqueue(c.gvk, namespace, name)
 }
 
 func (c *helmChartController) Informer() cache.SharedIndexInformer {
@@ -178,35 +178,35 @@ func (c *helmChartController) Cache() HelmChartCache {
 }
 
 func (c *helmChartController) Create(obj *v1.HelmChart) (*v1.HelmChart, error) {
-	return c.clientGetter.HelmCharts().Create(obj)
+	return c.clientGetter.HelmCharts(obj.Namespace).Create(obj)
 }
 
 func (c *helmChartController) Update(obj *v1.HelmChart) (*v1.HelmChart, error) {
-	return c.clientGetter.HelmCharts().Update(obj)
+	return c.clientGetter.HelmCharts(obj.Namespace).Update(obj)
 }
 
 func (c *helmChartController) UpdateStatus(obj *v1.HelmChart) (*v1.HelmChart, error) {
-	return c.clientGetter.HelmCharts().UpdateStatus(obj)
+	return c.clientGetter.HelmCharts(obj.Namespace).UpdateStatus(obj)
 }
 
-func (c *helmChartController) Delete(name string, options *metav1.DeleteOptions) error {
-	return c.clientGetter.HelmCharts().Delete(name, options)
+func (c *helmChartController) Delete(namespace, name string, options *metav1.DeleteOptions) error {
+	return c.clientGetter.HelmCharts(namespace).Delete(name, options)
 }
 
-func (c *helmChartController) Get(name string, options metav1.GetOptions) (*v1.HelmChart, error) {
-	return c.clientGetter.HelmCharts().Get(name, options)
+func (c *helmChartController) Get(namespace, name string, options metav1.GetOptions) (*v1.HelmChart, error) {
+	return c.clientGetter.HelmCharts(namespace).Get(name, options)
 }
 
-func (c *helmChartController) List(opts metav1.ListOptions) (*v1.HelmChartList, error) {
-	return c.clientGetter.HelmCharts().List(opts)
+func (c *helmChartController) List(namespace string, opts metav1.ListOptions) (*v1.HelmChartList, error) {
+	return c.clientGetter.HelmCharts(namespace).List(opts)
 }
 
-func (c *helmChartController) Watch(opts metav1.ListOptions) (watch.Interface, error) {
-	return c.clientGetter.HelmCharts().Watch(opts)
+func (c *helmChartController) Watch(namespace string, opts metav1.ListOptions) (watch.Interface, error) {
+	return c.clientGetter.HelmCharts(namespace).Watch(opts)
 }
 
-func (c *helmChartController) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1.HelmChart, err error) {
-	return c.clientGetter.HelmCharts().Patch(name, pt, data, subresources...)
+func (c *helmChartController) Patch(namespace, name string, pt types.PatchType, data []byte, subresources ...string) (result *v1.HelmChart, err error) {
+	return c.clientGetter.HelmCharts(namespace).Patch(name, pt, data, subresources...)
 }
 
 type helmChartCache struct {
@@ -214,12 +214,12 @@ type helmChartCache struct {
 	indexer cache.Indexer
 }
 
-func (c *helmChartCache) Get(name string) (*v1.HelmChart, error) {
-	return c.lister.Get(name)
+func (c *helmChartCache) Get(namespace, name string) (*v1.HelmChart, error) {
+	return c.lister.HelmCharts(namespace).Get(name)
 }
 
-func (c *helmChartCache) List(selector labels.Selector) ([]*v1.HelmChart, error) {
-	return c.lister.List(selector)
+func (c *helmChartCache) List(namespace string, selector labels.Selector) ([]*v1.HelmChart, error) {
+	return c.lister.HelmCharts(namespace).List(selector)
 }
 
 func (c *helmChartCache) AddIndexer(indexName string, indexer HelmChartIndexer) {

@@ -22,7 +22,7 @@ limitations under the License.
 package v1
 
 import (
-	helm "github.com/luthermonson/helmcontroller/types/apis/helm.cattle.io"
+	helm "github.com/rancher/helmcontroller/types/apis/helm.cattle.io"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"

@@ -21,10 +21,10 @@ package v1
 import (
 	time "time"
 
-	versioned "github.com/luthermonson/helmcontroller/pkg/generated/clientset/versioned"
-	internalinterfaces "github.com/luthermonson/helmcontroller/pkg/generated/informers/externalversions/internalinterfaces"
-	v1 "github.com/luthermonson/helmcontroller/pkg/generated/listers/helm.cattle.io/v1"
-	helmcattleiov1 "github.com/luthermonson/helmcontroller/types/apis/helm.cattle.io/v1"
+	versioned "github.com/rancher/helmcontroller/pkg/generated/clientset/versioned"
+	internalinterfaces "github.com/rancher/helmcontroller/pkg/generated/informers/externalversions/internalinterfaces"
+	v1 "github.com/rancher/helmcontroller/pkg/generated/listers/helm.cattle.io/v1"
+	helmcattleiov1 "github.com/rancher/helmcontroller/types/apis/helm.cattle.io/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
@@ -41,32 +41,33 @@ type HelmChartInformer interface {
 type helmChartInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
+	namespace        string
 }
 
 // NewHelmChartInformer constructs a new informer for HelmChart type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewHelmChartInformer(client versioned.Interface, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredHelmChartInformer(client, resyncPeriod, indexers, nil)
+func NewHelmChartInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+	return NewFilteredHelmChartInformer(client, namespace, resyncPeriod, indexers, nil)
 }
 
 // NewFilteredHelmChartInformer constructs a new informer for HelmChart type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFilteredHelmChartInformer(client versioned.Interface, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
+func NewFilteredHelmChartInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.HelmV1().HelmCharts().List(options)
+				return client.HelmV1().HelmCharts(namespace).List(options)
 			},
 			WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.HelmV1().HelmCharts().Watch(options)
+				return client.HelmV1().HelmCharts(namespace).Watch(options)
 			},
 		},
 		&helmcattleiov1.HelmChart{},
@@ -76,7 +77,7 @@ func NewFilteredHelmChartInformer(client versioned.Interface, resyncPeriod time.
 }
 
 func (f *helmChartInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredHelmChartInformer(client, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+	return NewFilteredHelmChartInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
 func (f *helmChartInformer) Informer() cache.SharedIndexInformer {

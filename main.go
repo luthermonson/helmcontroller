@@ -7,14 +7,15 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
-	helm "github.com/luthermonson/helmcontroller/pkg/generated/controllers/helm.cattle.io"
-	"github.com/luthermonson/helmcontroller/pkg/helm"
+	batchv1 "github.com/rancher/helmcontroller/pkg/generated/controllers/batch"
+	helmv1 "github.com/rancher/helmcontroller/pkg/generated/controllers/helm.cattle.io"
+	helmcontroller "github.com/rancher/helmcontroller/pkg/helm"
+	"github.com/rancher/wrangler/pkg/apply"
 	"github.com/rancher/wrangler/pkg/crd"
 	"github.com/rancher/wrangler/pkg/signals"
 	"github.com/rancher/wrangler/pkg/start"
 	"github.com/urfave/cli"
-	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
 	"os"
@@ -63,27 +64,36 @@ func run(c *cli.Context) error {
 		klog.Fatalf("Error building kubeconfig: %s", err.Error())
 	}
 
-	clientInterface, err := clientset.NewForConfig(cfg)
-	if err != nil {
-		klog.Fatalf("Error building kubernetes clientset: %s", err.Error())
-	}
-
-	helmController, err := helm.NewFactoryFromConfig(cfg)
+	helmController, err := helmv1.NewFactoryFromConfig(cfg)
 	if err != nil {
 		klog.Fatalf("Error building sample controllers: %s", err.Error())
 	}
 
-	crds := crd.NewFactoryFromClientGetter(clientInterface)
-	crd := crd.NonNamespacedType("HelmChart.helm.cattle.io/v1")
-	status, err := crds.CreateCRDs(ctx, crd)
-
+	batchController, err := batchv1.NewFactoryFromConfig(cfg)
 	if err != nil {
-		fmt.Println(err)
+		klog.Fatalf("Error building sample controllers: %s", err.Error())
 	}
 
-	fmt.Println(status)
+	crds, err := crd.NewFactoryFromClient(cfg)
+	if err != nil {
+		klog.Fatalf("Error creating CRD: %s", err.Error())
+	}
 
-	helmcontroller.Register(ctx, helmController.Helm().V1().HelmChart())
+	crd := crd.NamespacedType("HelmChart.helm.cattle.io/v1")
+	_, err = crds.CreateCRDs(ctx, crd)
+
+	if err != nil {
+		klog.Fatalf("Error building crd: %s", err.Error())
+	}
+
+	discoverClient, err := discovery.NewDiscoveryClientForConfig(cfg)
+	if err != nil {
+		klog.Fatalf("Error building discovery client: %s", err.Error())
+	}
+
+	objectSetApply := apply.New(discoverClient, apply.NewClientFactory(cfg), helmController.Helm().V1().HelmChart(), batchController.Batch().V1().Job())
+
+	helmcontroller.Register(ctx, objectSetApply, helmController.Helm().V1().HelmChart(), batchController.Batch().V1().Job())
 
 	if err := start.All(ctx, 4, helmController); err != nil {
 		klog.Fatalf("Error starting: %s", err.Error())

@@ -19,7 +19,7 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/luthermonson/helmcontroller/types/apis/helm.cattle.io/v1"
+	v1 "github.com/rancher/helmcontroller/types/apis/helm.cattle.io/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/tools/cache"
@@ -29,8 +29,8 @@ import (
 type HelmChartLister interface {
 	// List lists all HelmCharts in the indexer.
 	List(selector labels.Selector) (ret []*v1.HelmChart, err error)
-	// Get retrieves the HelmChart from the index for a given name.
-	Get(name string) (*v1.HelmChart, error)
+	// HelmCharts returns an object that can list and get HelmCharts.
+	HelmCharts(namespace string) HelmChartNamespaceLister
 	HelmChartListerExpansion
 }
 
@@ -52,9 +52,38 @@ func (s *helmChartLister) List(selector labels.Selector) (ret []*v1.HelmChart, e
 	return ret, err
 }
 
-// Get retrieves the HelmChart from the index for a given name.
-func (s *helmChartLister) Get(name string) (*v1.HelmChart, error) {
-	obj, exists, err := s.indexer.GetByKey(name)
+// HelmCharts returns an object that can list and get HelmCharts.
+func (s *helmChartLister) HelmCharts(namespace string) HelmChartNamespaceLister {
+	return helmChartNamespaceLister{indexer: s.indexer, namespace: namespace}
+}
+
+// HelmChartNamespaceLister helps list and get HelmCharts.
+type HelmChartNamespaceLister interface {
+	// List lists all HelmCharts in the indexer for a given namespace.
+	List(selector labels.Selector) (ret []*v1.HelmChart, err error)
+	// Get retrieves the HelmChart from the indexer for a given namespace and name.
+	Get(name string) (*v1.HelmChart, error)
+	HelmChartNamespaceListerExpansion
+}
+
+// helmChartNamespaceLister implements the HelmChartNamespaceLister
+// interface.
+type helmChartNamespaceLister struct {
+	indexer   cache.Indexer
+	namespace string
+}
+
+// List lists all HelmCharts in the indexer for a given namespace.
+func (s helmChartNamespaceLister) List(selector labels.Selector) (ret []*v1.HelmChart, err error) {
+	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
+		ret = append(ret, m.(*v1.HelmChart))
+	})
+	return ret, err
+}
+
+// Get retrieves the HelmChart from the indexer for a given namespace and name.
+func (s helmChartNamespaceLister) Get(name string) (*v1.HelmChart, error) {
+	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
 	if err != nil {
 		return nil, err
 	}

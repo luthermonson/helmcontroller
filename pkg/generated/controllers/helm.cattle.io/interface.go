@@ -19,9 +19,9 @@ limitations under the License.
 package helm
 
 import (
-	clientset "github.com/luthermonson/helmcontroller/pkg/generated/clientset/versioned"
-	v1 "github.com/luthermonson/helmcontroller/pkg/generated/controllers/helm.cattle.io/v1"
-	informers "github.com/luthermonson/helmcontroller/pkg/generated/informers/externalversions/helm.cattle.io"
+	clientset "github.com/rancher/helmcontroller/pkg/generated/clientset/versioned"
+	v1 "github.com/rancher/helmcontroller/pkg/generated/controllers/helm.cattle.io/v1"
+	informers "github.com/rancher/helmcontroller/pkg/generated/informers/externalversions/helm.cattle.io"
 	"github.com/rancher/wrangler/pkg/generic"
 )
 

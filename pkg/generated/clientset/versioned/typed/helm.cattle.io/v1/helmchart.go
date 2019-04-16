@@ -21,8 +21,8 @@ package v1
 import (
 	"time"
 
-	scheme "github.com/luthermonson/helmcontroller/pkg/generated/clientset/versioned/scheme"
-	v1 "github.com/luthermonson/helmcontroller/types/apis/helm.cattle.io/v1"
+	scheme "github.com/rancher/helmcontroller/pkg/generated/clientset/versioned/scheme"
+	v1 "github.com/rancher/helmcontroller/types/apis/helm.cattle.io/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
@@ -32,7 +32,7 @@ import (
 // HelmChartsGetter has a method to return a HelmChartInterface.
 // A group's client should implement this interface.
 type HelmChartsGetter interface {
-	HelmCharts() HelmChartInterface
+	HelmCharts(namespace string) HelmChartInterface
 }
 
 // HelmChartInterface has methods to work with HelmChart resources.
@@ -52,12 +52,14 @@ type HelmChartInterface interface {
 // helmCharts implements HelmChartInterface
 type helmCharts struct {
 	client rest.Interface
+	ns     string
 }
 
 // newHelmCharts returns a HelmCharts
-func newHelmCharts(c *HelmV1Client) *helmCharts {
+func newHelmCharts(c *HelmV1Client, namespace string) *helmCharts {
 	return &helmCharts{
 		client: c.RESTClient(),
+		ns:     namespace,
 	}
 }
 
@@ -65,6 +67,7 @@ func newHelmCharts(c *HelmV1Client) *helmCharts {
 func (c *helmCharts) Get(name string, options metav1.GetOptions) (result *v1.HelmChart, err error) {
 	result = &v1.HelmChart{}
 	err = c.client.Get().
+		Namespace(c.ns).
 		Resource("helmcharts").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
@@ -81,6 +84,7 @@ func (c *helmCharts) List(opts metav1.ListOptions) (result *v1.HelmChartList, er
 	}
 	result = &v1.HelmChartList{}
 	err = c.client.Get().
+		Namespace(c.ns).
 		Resource("helmcharts").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -97,6 +101,7 @@ func (c *helmCharts) Watch(opts metav1.ListOptions) (watch.Interface, error) {
 	}
 	opts.Watch = true
 	return c.client.Get().
+		Namespace(c.ns).
 		Resource("helmcharts").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -107,6 +112,7 @@ func (c *helmCharts) Watch(opts metav1.ListOptions) (watch.Interface, error) {
 func (c *helmCharts) Create(helmChart *v1.HelmChart) (result *v1.HelmChart, err error) {
 	result = &v1.HelmChart{}
 	err = c.client.Post().
+		Namespace(c.ns).
 		Resource("helmcharts").
 		Body(helmChart).
 		Do().
@@ -118,6 +124,7 @@ func (c *helmCharts) Create(helmChart *v1.HelmChart) (result *v1.HelmChart, err 
 func (c *helmCharts) Update(helmChart *v1.HelmChart) (result *v1.HelmChart, err error) {
 	result = &v1.HelmChart{}
 	err = c.client.Put().
+		Namespace(c.ns).
 		Resource("helmcharts").
 		Name(helmChart.Name).
 		Body(helmChart).
@@ -132,6 +139,7 @@ func (c *helmCharts) Update(helmChart *v1.HelmChart) (result *v1.HelmChart, err 
 func (c *helmCharts) UpdateStatus(helmChart *v1.HelmChart) (result *v1.HelmChart, err error) {
 	result = &v1.HelmChart{}
 	err = c.client.Put().
+		Namespace(c.ns).
 		Resource("helmcharts").
 		Name(helmChart.Name).
 		SubResource("status").
@@ -144,6 +152,7 @@ func (c *helmCharts) UpdateStatus(helmChart *v1.HelmChart) (result *v1.HelmChart
 // Delete takes name of the helmChart and deletes it. Returns an error if one occurs.
 func (c *helmCharts) Delete(name string, options *metav1.DeleteOptions) error {
 	return c.client.Delete().
+		Namespace(c.ns).
 		Resource("helmcharts").
 		Name(name).
 		Body(options).
@@ -158,6 +167,7 @@ func (c *helmCharts) DeleteCollection(options *metav1.DeleteOptions, listOptions
 		timeout = time.Duration(*listOptions.TimeoutSeconds) * time.Second
 	}
 	return c.client.Delete().
+		Namespace(c.ns).
 		Resource("helmcharts").
 		VersionedParams(&listOptions, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -170,6 +180,7 @@ func (c *helmCharts) DeleteCollection(options *metav1.DeleteOptions, listOptions
 func (c *helmCharts) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1.HelmChart, err error) {
 	result = &v1.HelmChart{}
 	err = c.client.Patch(pt).
+		Namespace(c.ns).
 		Resource("helmcharts").
 		SubResource(subresources...).
 		Name(name).

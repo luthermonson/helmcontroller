@@ -19,9 +19,9 @@ limitations under the License.
 package fake
 
 import (
-	clientset "github.com/luthermonson/helmcontroller/pkg/generated/clientset/versioned"
-	helmv1 "github.com/luthermonson/helmcontroller/pkg/generated/clientset/versioned/typed/helm.cattle.io/v1"
-	fakehelmv1 "github.com/luthermonson/helmcontroller/pkg/generated/clientset/versioned/typed/helm.cattle.io/v1/fake"
+	clientset "github.com/rancher/helmcontroller/pkg/generated/clientset/versioned"
+	helmv1 "github.com/rancher/helmcontroller/pkg/generated/clientset/versioned/typed/helm.cattle.io/v1"
+	fakehelmv1 "github.com/rancher/helmcontroller/pkg/generated/clientset/versioned/typed/helm.cattle.io/v1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"

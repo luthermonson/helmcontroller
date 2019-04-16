@@ -21,3 +21,7 @@ package v1
 // HelmChartListerExpansion allows custom methods to be added to
 // HelmChartLister.
 type HelmChartListerExpansion interface{}
+
+// HelmChartNamespaceListerExpansion allows custom methods to be added to
+// HelmChartNamespaceLister.
+type HelmChartNamespaceListerExpansion interface{}

@@ -19,8 +19,8 @@ limitations under the License.
 package helm
 
 import (
-	v1 "github.com/luthermonson/helmcontroller/pkg/generated/informers/externalversions/helm.cattle.io/v1"
-	internalinterfaces "github.com/luthermonson/helmcontroller/pkg/generated/informers/externalversions/internalinterfaces"
+	v1 "github.com/rancher/helmcontroller/pkg/generated/informers/externalversions/helm.cattle.io/v1"
+	internalinterfaces "github.com/rancher/helmcontroller/pkg/generated/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to each of this group's versions.
