@@ -19,17 +19,17 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/rancher/helmcontroller/pkg/apis/helm.cattle.io/v1"
-	clientset "github.com/rancher/helmcontroller/pkg/generated/clientset/versioned/typed/helm.cattle.io/v1"
-	informers "github.com/rancher/helmcontroller/pkg/generated/informers/externalversions/helm.cattle.io/v1"
 	"github.com/rancher/wrangler/pkg/generic"
+	v1 "k8s.io/api/rbac/v1"
+	informers "k8s.io/client-go/informers/rbac/v1"
+	clientset "k8s.io/client-go/kubernetes/typed/rbac/v1"
 )
 
 type Interface interface {
-	HelmChart() HelmChartController
+	ClusterRoleBinding() ClusterRoleBindingController
 }
 
-func New(controllerManager *generic.ControllerManager, client clientset.HelmV1Interface,
+func New(controllerManager *generic.ControllerManager, client clientset.RbacV1Interface,
 	informers informers.Interface) Interface {
 	return &version{
 		controllerManager: controllerManager,
@@ -41,9 +41,9 @@ func New(controllerManager *generic.ControllerManager, client clientset.HelmV1In
 type version struct {
 	controllerManager *generic.ControllerManager
 	informers         informers.Interface
-	client            clientset.HelmV1Interface
+	client            clientset.RbacV1Interface
 }
 
-func (c *version) HelmChart() HelmChartController {
-	return NewHelmChartController(v1.SchemeGroupVersion.WithKind("HelmChart"), c.controllerManager, c.client, c.informers.HelmCharts())
+func (c *version) ClusterRoleBinding() ClusterRoleBindingController {
+	return NewClusterRoleBindingController(v1.SchemeGroupVersion.WithKind("ClusterRoleBinding"), c.controllerManager, c.client, c.informers.ClusterRoleBindings())
 }

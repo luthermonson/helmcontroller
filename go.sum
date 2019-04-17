@@ -63,8 +63,8 @@ github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZN
 github.com/rancher/mapper v0.0.0-20190329182506-3504e44bb041 h1:N7xzfYuYLd65Ety4gCQtIAMUb8ARuwBBq+4JLFIpcYs=
 github.com/rancher/mapper v0.0.0-20190329182506-3504e44bb041/go.mod h1:Nzy8UuGr5kHE+btlCBx2lElEcsoi7lFn43feKKdYW9c=
 github.com/rancher/wrangler v0.0.0-20190329182315-1e7b870cf096/go.mod h1:4Vs/RFwhUEydG+aG3rl5JwTSrZ/PaODDVdn3+jHbUIo=
-github.com/rancher/wrangler v0.0.0-20190412173752-b76ec8e2558e h1:BZHOs1U/qNjeZ9wj9RvmlPD3rvGUwNCWHb7qezT+Sfo=
-github.com/rancher/wrangler v0.0.0-20190412173752-b76ec8e2558e/go.mod h1:F+QUZQx3JUyklELOH12QVzW9RQCg0l7ZX7jKSkPRFVg=
+github.com/rancher/wrangler v0.0.0-20190417232313-64d5fba7aa4f h1:stCIVbd3Rg/rHYc5eWRrnmXVpoDoM/uhfCoVPsIhMRE=
+github.com/rancher/wrangler v0.0.0-20190417232313-64d5fba7aa4f/go.mod h1:pvaibZ9rrzPcBypmueuxS3v9j/bG0LytjIKtKheqyFk=
 github.com/sirupsen/logrus v1.4.0 h1:yKenngtzGh+cUSSh6GWbxW2abRqhYUSR/t/6+2QqNvE=
 github.com/sirupsen/logrus v1.4.0/go.mod h1:LxeOpSwHxABJmUn/MG1IvRgCAasNZTLOkJPxbbu5VWo=
 github.com/sirupsen/logrus v1.4.1 h1:GL2rEmy6nsikmW0r8opw9JIRScdMF5hA8cOYLH7In1k=

@@ -4,7 +4,8 @@ metadata:
   name: traefik 
   namespace: kube-system
 spec:
-  chart: https://%{KUBERNETES_API}%/static/charts/traefik-1.64.0.tgz
+  chart: stable/traefik
   set:
     rbac.enabled: "true"
     ssl.enabled: "true"
+

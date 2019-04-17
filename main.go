@@ -1,6 +1,6 @@
-//go:generate go run types/codegen/cleanup/main.go
-//go:generate rm -rf ./pkg/generated/*
-//go:generate go run types/codegen/main.go
+//go:generate go run pkg/codegen/cleanup/main.go
+//go:generate /bin/rm -rf pkg/generated
+//go:generate go run pkg/codegen/main.go
 
 package main
 
@@ -8,10 +8,11 @@ import (
 	"context"
 	"flag"
 	batchv1 "github.com/rancher/helmcontroller/pkg/generated/controllers/batch"
+	rbacv1 "github.com/rancher/helmcontroller/pkg/generated/controllers/rbac"
+	corev1 "github.com/rancher/helmcontroller/pkg/generated/controllers/core"
 	helmv1 "github.com/rancher/helmcontroller/pkg/generated/controllers/helm.cattle.io"
 	helmcontroller "github.com/rancher/helmcontroller/pkg/helm"
 	"github.com/rancher/wrangler/pkg/apply"
-	"github.com/rancher/wrangler/pkg/crd"
 	"github.com/rancher/wrangler/pkg/signals"
 	"github.com/rancher/wrangler/pkg/start"
 	"github.com/urfave/cli"
@@ -34,12 +35,17 @@ func main() {
 		cli.StringFlag{
 			Name:   "kubeconfig, k",
 			EnvVar: "KUBECONFIG",
-			Value:  "$HOME/.kube/config",
+			Value:  "",
 		},
 		cli.StringFlag{
 			Name:   "master, m",
 			EnvVar: "MASTERURL",
 			Value:  "",
+		},
+		cli.IntFlag{
+			Name:   "threads, t",
+			EnvVar: "THREADINESS",
+			Value:  4,
 		},
 	}
 	app.Action = run
@@ -57,6 +63,10 @@ func run(c *cli.Context) error {
 
 	masterURL := c.String("master")
 	kubeconfig := c.String("kubeconfig")
+	threadiness := c.Int("threads")
+
+	//add namspace param
+
 	ctx := signals.SetupSignalHandler(context.Background())
 
 	cfg, err := clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)
@@ -64,26 +74,24 @@ func run(c *cli.Context) error {
 		klog.Fatalf("Error building kubeconfig: %s", err.Error())
 	}
 
-	helmController, err := helmv1.NewFactoryFromConfig(cfg)
+	helms, err := helmv1.NewFactoryFromConfig(cfg)
 	if err != nil {
 		klog.Fatalf("Error building sample controllers: %s", err.Error())
 	}
 
-	batchController, err := batchv1.NewFactoryFromConfig(cfg)
+	batches, err := batchv1.NewFactoryFromConfig(cfg)
 	if err != nil {
 		klog.Fatalf("Error building sample controllers: %s", err.Error())
 	}
 
-	crds, err := crd.NewFactoryFromClient(cfg)
+	rbacs, err := rbacv1.NewFactoryFromConfig(cfg)
 	if err != nil {
-		klog.Fatalf("Error creating CRD: %s", err.Error())
+		klog.Fatalf("Error building sample controllers: %s", err.Error())
 	}
 
-	crd := crd.NamespacedType("HelmChart.helm.cattle.io/v1")
-	_, err = crds.CreateCRDs(ctx, crd)
-
+	cores, err := corev1.NewFactoryFromConfig(cfg)
 	if err != nil {
-		klog.Fatalf("Error building crd: %s", err.Error())
+		klog.Fatalf("Error building sample controllers: %s", err.Error())
 	}
 
 	discoverClient, err := discovery.NewDiscoveryClientForConfig(cfg)
@@ -91,11 +99,15 @@ func run(c *cli.Context) error {
 		klog.Fatalf("Error building discovery client: %s", err.Error())
 	}
 
-	objectSetApply := apply.New(discoverClient, apply.NewClientFactory(cfg), helmController.Helm().V1().HelmChart(), batchController.Batch().V1().Job())
+	objectSetApply := apply.New(discoverClient, apply.NewClientFactory(cfg));
 
-	helmcontroller.Register(ctx, objectSetApply, helmController.Helm().V1().HelmChart(), batchController.Batch().V1().Job())
+	helmcontroller.Register(ctx, objectSetApply,
+		helms.Helm().V1().HelmChart(),
+		batches.Batch().V1().Job(),
+		rbacs.Rbac().V1().ClusterRoleBinding(),
+		cores.Core().V1().ServiceAccount())
 
-	if err := start.All(ctx, 4, helmController); err != nil {
+	if err := start.All(ctx, threadiness, helms, batches, rbacs, cores); err != nil {
 		klog.Fatalf("Error starting: %s", err.Error())
 	}
 

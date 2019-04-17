@@ -8,4 +8,7 @@ spec:
   names:
     kind: HelmChart
     plural: helmcharts
+    singular: helmchart
   scope: Namespaced
+  subresources:
+    status: {}

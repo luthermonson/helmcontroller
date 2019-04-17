@@ -20,11 +20,10 @@ package v1
 
 import (
 	"context"
-
+	"github.com/rancher/helmcontroller/pkg/apis/helm.cattle.io/v1"
 	clientset "github.com/rancher/helmcontroller/pkg/generated/clientset/versioned/typed/helm.cattle.io/v1"
 	informers "github.com/rancher/helmcontroller/pkg/generated/informers/externalversions/helm.cattle.io/v1"
 	listers "github.com/rancher/helmcontroller/pkg/generated/listers/helm.cattle.io/v1"
-	v1 "github.com/rancher/helmcontroller/types/apis/helm.cattle.io/v1"
 	"github.com/rancher/wrangler/pkg/generic"
 	"k8s.io/apimachinery/pkg/api/equality"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

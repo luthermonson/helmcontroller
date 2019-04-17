@@ -5,20 +5,22 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"sort"
-	helmcontroller "github.com/rancher/helmcontroller/pkg/generated/controllers/helm.cattle.io/v1"
+	helmv1 "github.com/rancher/helmcontroller/pkg/apis/helm.cattle.io/v1"
 	batchcontroller "github.com/rancher/helmcontroller/pkg/generated/controllers/batch/v1"
-	helmv1 "github.com/rancher/helmcontroller/types/apis/helm.cattle.io/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
-	"github.com/rancher/wrangler/pkg/relatedresource"
-	"github.com/rancher/wrangler/pkg/objectset"
+	corecontroller "github.com/rancher/helmcontroller/pkg/generated/controllers/core/v1"
+	helmcontroller "github.com/rancher/helmcontroller/pkg/generated/controllers/helm.cattle.io/v1"
+	rbaccontroller "github.com/rancher/helmcontroller/pkg/generated/controllers/rbac/v1"
 	"github.com/rancher/wrangler/pkg/apply"
-	rbac "k8s.io/api/rbac/v1"
+	"github.com/rancher/wrangler/pkg/objectset"
+	"github.com/rancher/wrangler/pkg/relatedresource"
 	batch "k8s.io/api/batch/v1"
 	core "k8s.io/api/core/v1"
+	rbac "k8s.io/api/rbac/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"sort"
 )
 
 var (
@@ -26,19 +28,27 @@ var (
 )
 
 type Controller struct {
-	helms 		helmcontroller.HelmChartController
-	jobs 		batchcontroller.JobController
-	apply		apply.Apply
+	helmController 	helmcontroller.HelmChartController
+	jobsCache 		batchcontroller.JobCache
+	apply			apply.Apply
 }
 
 const (
 	namespace = "kube-system"
 	image     = "rancher/klipper-helm:v0.1.5"
-	label     = "helm.k3s.cattle.io/chart"
-	name      = "helm.cattle.io"
+	label     = "helmcharts.helm.cattle.io/chart"
+	name      = "helm-controller"
 )
 
-func Register(ctx context.Context, apply apply.Apply, helms helmcontroller.HelmChartController, jobs batchcontroller.JobController) {
+func Register(ctx context.Context, apply apply.Apply,
+	helms helmcontroller.HelmChartController,
+	jobs batchcontroller.JobController,
+	crbs rbaccontroller.ClusterRoleBindingController,
+	sas corecontroller.ServiceAccountController) {
+	apply = apply.WithSetID(name).
+		WithCacheTypes(helms, jobs, crbs, sas).
+		WithStrictCaching()
+
 	relatedresource.Watch(ctx, "helm-pod-watch",
 		func(namespace, name string, obj runtime.Object) ([]relatedresource.Key, error) {
 			if job, ok := obj.(*batch.Job); ok {
@@ -58,8 +68,8 @@ func Register(ctx context.Context, apply apply.Apply, helms helmcontroller.HelmC
 		jobs)
 
 	controller := &Controller{
-		helms: helms,
-		jobs:  jobs,
+		helmController: helms,
+		jobsCache:  jobs.Cache(),
 		apply: apply,
 	}
 
@@ -68,6 +78,10 @@ func Register(ctx context.Context, apply apply.Apply, helms helmcontroller.HelmC
 }
 
 func (c *Controller) OnHelmChanged(key string, chart *helmv1.HelmChart) (*helmv1.HelmChart, error) {
+	if chart == nil {
+		return nil, nil
+	}
+
 	if chart.Namespace != namespace || chart.Spec.Chart == "" {
 		return chart, nil
 	}
@@ -87,27 +101,27 @@ func (c *Controller) OnHelmChanged(key string, chart *helmv1.HelmChart) (*helmv1
 
 	chartCopy := chart.DeepCopy()
 	chartCopy.Status.JobName = job.Name
-	return c.helms.Update(chartCopy)
+	return c.helmController.Update(chartCopy)
 }
 
 func (c *Controller) OnHelmRemove (key string, chart *helmv1.HelmChart) (*helmv1.HelmChart, error) {
 	if chart.Namespace != namespace || chart.Spec.Chart == "" {
 		return chart, nil
 	}
-
 	job, _ := job(chart)
-	job, err := c.jobs.Cache().Get(chart.Namespace, job.Name)
+	job, err := c.jobsCache.Get(chart.Namespace, job.Name)
+
 	if errors.IsNotFound(err) {
 		_, err := c.OnHelmChanged(key, chart)
 		if err != nil {
 			return chart, err
 		}
 	} else if err != nil {
-		return nil, err
+		return chart, err
 	}
 
 	if job.Status.Succeeded <= 0 {
-		return nil, fmt.Errorf("waiting for delete of helm chart %s", chart.Name)
+		return chart, fmt.Errorf("waiting for delete of helm chart %s", chart.Name)
 	}
 
 	return chart, c.apply.WithOwner(chart).Apply(objectset.NewObjectSet())
@@ -245,7 +259,6 @@ func roleBinding(chart *helmv1.HelmChart) *rbac.ClusterRoleBinding {
 			},
 		},
 	}
-
 }
 
 func serviceAccount(chart *helmv1.HelmChart) *core.ServiceAccount {

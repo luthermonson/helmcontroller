@@ -20,7 +20,7 @@ require (
 	github.com/onsi/ginkgo v1.8.0 // indirect
 	github.com/onsi/gomega v1.5.0 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
-	github.com/rancher/wrangler v0.0.0-20190412173752-b76ec8e2558e
+	github.com/rancher/wrangler v0.0.0-20190417232313-64d5fba7aa4f
 	github.com/sirupsen/logrus v1.4.1
 	github.com/spf13/pflag v1.0.3 // indirect
 	github.com/urfave/cli v1.20.0
@@ -30,7 +30,6 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.2.2 // indirect
 	k8s.io/api v0.0.0-20190222213804-5cb15d344471
-	k8s.io/apiextensions-apiserver v0.0.0-20190325193600-475668423e9f
 	k8s.io/apimachinery v0.0.0-20190221213512-86fb29eff628
 	k8s.io/client-go v2.0.0-alpha.0.0.20190307161346-7621a5ebb88b+incompatible
 	k8s.io/klog v0.2.0
