@@ -1,3 +1,3 @@
 FROM alpine
-COPY bin/helmcontroller /usr/bin/
-CMD ["helmcontroller"]
+COPY bin/helm-controller /usr/bin/
+CMD ["helm-controller"]

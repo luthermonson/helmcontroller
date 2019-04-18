@@ -6,11 +6,10 @@ package main
 
 import (
 	"context"
-	"flag"
 	batchv1 "github.com/rancher/helm-controller/pkg/generated/controllers/batch"
-	rbacv1 "github.com/rancher/helm-controller/pkg/generated/controllers/rbac"
 	corev1 "github.com/rancher/helm-controller/pkg/generated/controllers/core"
 	helmv1 "github.com/rancher/helm-controller/pkg/generated/controllers/helm.cattle.io"
+	rbacv1 "github.com/rancher/helm-controller/pkg/generated/controllers/rbac"
 	helmcontroller "github.com/rancher/helm-controller/pkg/helm"
 	"github.com/rancher/wrangler/pkg/apply"
 	"github.com/rancher/wrangler/pkg/signals"
@@ -61,17 +60,10 @@ func main() {
 }
 
 func run(c *cli.Context) error {
-
-	klogFlags := flag.NewFlagSet("klog", flag.ExitOnError)
-	klogFlags.Set("logtostderr", "true")
-	klog.InitFlags(klogFlags)
-
 	masterURL := c.String("master")
 	kubeconfig := c.String("kubeconfig")
 	namespace := c.String("namespace")
 	threadiness := c.Int("threads")
-
-	//add namspace param
 
 	ctx := signals.SetupSignalHandler(context.Background())
 
@@ -105,7 +97,7 @@ func run(c *cli.Context) error {
 		klog.Fatalf("Error building discovery client: %s", err.Error())
 	}
 
-	objectSetApply := apply.New(discoverClient, apply.NewClientFactory(cfg));
+	objectSetApply := apply.New(discoverClient, apply.NewClientFactory(cfg))
 
 	helmcontroller.Register(ctx, namespace, objectSetApply,
 		helms.Helm().V1().HelmChart(),

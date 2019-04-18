@@ -2,4 +2,5 @@
 /.dapper
 /.idea
 /bin
+/dist
 helm-controller
