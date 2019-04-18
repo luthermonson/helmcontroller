@@ -2,7 +2,7 @@ apiVersion: helm.cattle.io/v1
 kind: HelmChart
 metadata:
   name: traefik 
-  namespace: luther
+  namespace: kube-system
 spec:
   chart: stable/traefik
   set:

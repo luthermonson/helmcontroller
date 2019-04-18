@@ -19,7 +19,7 @@ limitations under the License.
 package rbac
 
 import (
-	v1 "github.com/rancher/helmcontroller/pkg/generated/controllers/rbac/v1"
+	v1 "github.com/rancher/helm-controller/pkg/generated/controllers/rbac/v1"
 	"github.com/rancher/wrangler/pkg/generic"
 	informers "k8s.io/client-go/informers/rbac"
 	clientset "k8s.io/client-go/kubernetes"

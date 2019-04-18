@@ -19,8 +19,8 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/rancher/helmcontroller/pkg/apis/helm.cattle.io/v1"
-	"github.com/rancher/helmcontroller/pkg/generated/clientset/versioned/scheme"
+	v1 "github.com/rancher/helm-controller/pkg/apis/helm.cattle.io/v1"
+	"github.com/rancher/helm-controller/pkg/generated/clientset/versioned/scheme"
 	serializer "k8s.io/apimachinery/pkg/runtime/serializer"
 	rest "k8s.io/client-go/rest"
 )

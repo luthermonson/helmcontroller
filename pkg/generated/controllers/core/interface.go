@@ -19,7 +19,7 @@ limitations under the License.
 package core
 
 import (
-	v1 "github.com/rancher/helmcontroller/pkg/generated/controllers/core/v1"
+	v1 "github.com/rancher/helm-controller/pkg/generated/controllers/core/v1"
 	"github.com/rancher/wrangler/pkg/generic"
 	informers "k8s.io/client-go/informers/core"
 	clientset "k8s.io/client-go/kubernetes"

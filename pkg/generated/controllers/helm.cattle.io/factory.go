@@ -22,8 +22,8 @@ import (
 	"context"
 	"time"
 
-	clientset "github.com/rancher/helmcontroller/pkg/generated/clientset/versioned"
-	informers "github.com/rancher/helmcontroller/pkg/generated/informers/externalversions"
+	clientset "github.com/rancher/helm-controller/pkg/generated/clientset/versioned"
+	informers "github.com/rancher/helm-controller/pkg/generated/informers/externalversions"
 	"github.com/rancher/wrangler/pkg/generic"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/rest"

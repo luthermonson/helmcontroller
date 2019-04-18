@@ -7,11 +7,11 @@ package main
 import (
 	"context"
 	"flag"
-	batchv1 "github.com/rancher/helmcontroller/pkg/generated/controllers/batch"
-	rbacv1 "github.com/rancher/helmcontroller/pkg/generated/controllers/rbac"
-	corev1 "github.com/rancher/helmcontroller/pkg/generated/controllers/core"
-	helmv1 "github.com/rancher/helmcontroller/pkg/generated/controllers/helm.cattle.io"
-	helmcontroller "github.com/rancher/helmcontroller/pkg/helm"
+	batchv1 "github.com/rancher/helm-controller/pkg/generated/controllers/batch"
+	rbacv1 "github.com/rancher/helm-controller/pkg/generated/controllers/rbac"
+	corev1 "github.com/rancher/helm-controller/pkg/generated/controllers/core"
+	helmv1 "github.com/rancher/helm-controller/pkg/generated/controllers/helm.cattle.io"
+	helmcontroller "github.com/rancher/helm-controller/pkg/helm"
 	"github.com/rancher/wrangler/pkg/apply"
 	"github.com/rancher/wrangler/pkg/signals"
 	"github.com/rancher/wrangler/pkg/start"
@@ -28,9 +28,9 @@ var (
 
 func main() {
 	app := cli.NewApp()
-	app.Name = "helmcontroller"
+	app.Name = "helm-controller"
 	app.Version = VERSION
-	app.Usage = "helmcontroller needs help!"
+	app.Usage = "helm controller, to help with helm deployments."
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:   "kubeconfig, k",

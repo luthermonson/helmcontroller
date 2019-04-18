@@ -2,4 +2,4 @@
 /.dapper
 /.idea
 /bin
-helmcontroller
+helm-controller

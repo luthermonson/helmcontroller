@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/rancher/helmcontroller/pkg/apis/helm.cattle.io/v1"
+	"github.com/rancher/helm-controller/pkg/apis/helm.cattle.io/v1"
 	"github.com/rancher/wrangler/pkg/controller-gen"
 	"github.com/rancher/wrangler/pkg/controller-gen/args"
 	batch "k8s.io/api/batch/v1"
@@ -11,7 +11,7 @@ import (
 
 func main() {
 	controllergen.Run(args.Options{
-		OutputPackage: "github.com/rancher/helmcontroller/pkg/generated",
+		OutputPackage: "github.com/rancher/helm-controller/pkg/generated",
 		Boilerplate:   "hack/boilerplate.go.txt",
 		Groups: map[string]args.Group{
 			"helm.cattle.io": {

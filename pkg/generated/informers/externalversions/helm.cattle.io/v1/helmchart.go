@@ -21,10 +21,10 @@ package v1
 import (
 	time "time"
 
-	helmcattleiov1 "github.com/rancher/helmcontroller/pkg/apis/helm.cattle.io/v1"
-	versioned "github.com/rancher/helmcontroller/pkg/generated/clientset/versioned"
-	internalinterfaces "github.com/rancher/helmcontroller/pkg/generated/informers/externalversions/internalinterfaces"
-	v1 "github.com/rancher/helmcontroller/pkg/generated/listers/helm.cattle.io/v1"
+	helmcattleiov1 "github.com/rancher/helm-controller/pkg/apis/helm.cattle.io/v1"
+	versioned "github.com/rancher/helm-controller/pkg/generated/clientset/versioned"
+	internalinterfaces "github.com/rancher/helm-controller/pkg/generated/informers/externalversions/internalinterfaces"
+	v1 "github.com/rancher/helm-controller/pkg/generated/listers/helm.cattle.io/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"

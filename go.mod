@@ -1,9 +1,9 @@
-module github.com/rancher/helmcontroller
+module github.com/rancher/helm-controller
 
 go 1.12
 
 replace (
-	github.com/rancher/helmcontroller => ./
+	github.com/rancher/helm-controller => ./
 	github.com/rancher/wrangler => /Users/luther/r/wrangler/src/github.com/rancher/wrangler
 )
 

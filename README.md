@@ -1,4 +1,4 @@
-helmcontroller
+helm-controller
 ========
 
 ## ***FILL THIS OUT WITH A USEFUL DESCRIPTION OF THIS REPO***
@@ -10,7 +10,7 @@ helmcontroller
 
 ## Running
 
-`./bin/helmcontroller`
+`./bin/helm-controller`
 
 ## License
 Copyright (c) 2019 [Rancher Labs, Inc.](http://rancher.com)
