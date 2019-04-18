@@ -2,7 +2,10 @@ module github.com/rancher/helmcontroller
 
 go 1.12
 
-replace github.com/rancher/helmcontroller => ./
+replace (
+	github.com/rancher/helmcontroller => ./
+	github.com/rancher/wrangler => /Users/luther/r/wrangler/src/github.com/rancher/wrangler
+)
 
 require (
 	github.com/evanphx/json-patch v4.1.0+incompatible // indirect

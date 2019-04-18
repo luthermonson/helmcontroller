@@ -28,19 +28,19 @@ var (
 )
 
 type Controller struct {
+	namespace		string
 	helmController 	helmcontroller.HelmChartController
 	jobsCache 		batchcontroller.JobCache
 	apply			apply.Apply
 }
 
 const (
-	namespace = "kube-system"
 	image     = "rancher/klipper-helm:v0.1.5"
 	label     = "helmcharts.helm.cattle.io/chart"
 	name      = "helm-controller"
 )
 
-func Register(ctx context.Context, apply apply.Apply,
+func Register(ctx context.Context, namespace string, apply apply.Apply,
 	helms helmcontroller.HelmChartController,
 	jobs batchcontroller.JobController,
 	crbs rbaccontroller.ClusterRoleBindingController,
@@ -68,6 +68,7 @@ func Register(ctx context.Context, apply apply.Apply,
 		jobs)
 
 	controller := &Controller{
+		namespace: namespace,
 		helmController: helms,
 		jobsCache:  jobs.Cache(),
 		apply: apply,
@@ -82,7 +83,7 @@ func (c *Controller) OnHelmChanged(key string, chart *helmv1.HelmChart) (*helmv1
 		return nil, nil
 	}
 
-	if chart.Namespace != namespace || chart.Spec.Chart == "" {
+	if chart.Namespace != c.namespace || chart.Spec.Chart == "" {
 		return chart, nil
 	}
 
@@ -105,7 +106,7 @@ func (c *Controller) OnHelmChanged(key string, chart *helmv1.HelmChart) (*helmv1
 }
 
 func (c *Controller) OnHelmRemove (key string, chart *helmv1.HelmChart) (*helmv1.HelmChart, error) {
-	if chart.Namespace != namespace || chart.Spec.Chart == "" {
+	if chart.Namespace != c.namespace || chart.Spec.Chart == "" {
 		return chart, nil
 	}
 	job, _ := job(chart)

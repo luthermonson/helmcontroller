@@ -42,6 +42,11 @@ func main() {
 			EnvVar: "MASTERURL",
 			Value:  "",
 		},
+		cli.StringFlag{
+			Name:   "namespace, n",
+			EnvVar: "NAMESPACE",
+			Value:  "kube-system",
+		},
 		cli.IntFlag{
 			Name:   "threads, t",
 			EnvVar: "THREADINESS",
@@ -63,6 +68,7 @@ func run(c *cli.Context) error {
 
 	masterURL := c.String("master")
 	kubeconfig := c.String("kubeconfig")
+	namespace := c.String("namespace")
 	threadiness := c.Int("threads")
 
 	//add namspace param
@@ -74,22 +80,22 @@ func run(c *cli.Context) error {
 		klog.Fatalf("Error building kubeconfig: %s", err.Error())
 	}
 
-	helms, err := helmv1.NewFactoryFromConfig(cfg)
+	helms, err := helmv1.NewFactoryFromConfigWithNamespace(cfg, namespace)
 	if err != nil {
 		klog.Fatalf("Error building sample controllers: %s", err.Error())
 	}
 
-	batches, err := batchv1.NewFactoryFromConfig(cfg)
+	batches, err := batchv1.NewFactoryFromConfigWithNamespace(cfg, namespace)
 	if err != nil {
 		klog.Fatalf("Error building sample controllers: %s", err.Error())
 	}
 
-	rbacs, err := rbacv1.NewFactoryFromConfig(cfg)
+	rbacs, err := rbacv1.NewFactoryFromConfigWithNamespace(cfg, namespace)
 	if err != nil {
 		klog.Fatalf("Error building sample controllers: %s", err.Error())
 	}
 
-	cores, err := corev1.NewFactoryFromConfig(cfg)
+	cores, err := corev1.NewFactoryFromConfigWithNamespace(cfg, namespace)
 	if err != nil {
 		klog.Fatalf("Error building sample controllers: %s", err.Error())
 	}
@@ -101,7 +107,7 @@ func run(c *cli.Context) error {
 
 	objectSetApply := apply.New(discoverClient, apply.NewClientFactory(cfg));
 
-	helmcontroller.Register(ctx, objectSetApply,
+	helmcontroller.Register(ctx, namespace, objectSetApply,
 		helms.Helm().V1().HelmChart(),
 		batches.Batch().V1().Job(),
 		rbacs.Rbac().V1().ClusterRoleBinding(),
