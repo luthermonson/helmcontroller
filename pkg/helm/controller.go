@@ -40,7 +40,7 @@ const (
 	name      = "helm-controller"
 )
 
-func Register(ctx context.Context, namespace string, apply apply.Apply,
+func Register(ctx context.Context, apply apply.Apply,
 	helms helmcontroller.HelmChartController,
 	jobs batchcontroller.JobController,
 	crbs rbaccontroller.ClusterRoleBindingController,
@@ -68,7 +68,6 @@ func Register(ctx context.Context, namespace string, apply apply.Apply,
 		jobs)
 
 	controller := &Controller{
-		namespace: namespace,
 		helmController: helms,
 		jobsCache:  jobs.Cache(),
 		apply: apply,
@@ -83,7 +82,7 @@ func (c *Controller) OnHelmChanged(key string, chart *helmv1.HelmChart) (*helmv1
 		return nil, nil
 	}
 
-	if chart.Namespace != c.namespace || chart.Spec.Chart == "" {
+	if chart.Spec.Chart == "" {
 		return chart, nil
 	}
 
@@ -106,7 +105,7 @@ func (c *Controller) OnHelmChanged(key string, chart *helmv1.HelmChart) (*helmv1
 }
 
 func (c *Controller) OnHelmRemove (key string, chart *helmv1.HelmChart) (*helmv1.HelmChart, error) {
-	if chart.Namespace != c.namespace || chart.Spec.Chart == "" {
+	if chart.Spec.Chart == "" {
 		return chart, nil
 	}
 	job, _ := job(chart)

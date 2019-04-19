@@ -44,7 +44,7 @@ func main() {
 		cli.StringFlag{
 			Name:   "namespace, n",
 			EnvVar: "NAMESPACE",
-			Value:  "kube-system",
+			Value:  "",
 		},
 		cli.IntFlag{
 			Name:   "threads, t",
@@ -99,7 +99,7 @@ func run(c *cli.Context) error {
 
 	objectSetApply := apply.New(discoverClient, apply.NewClientFactory(cfg))
 
-	helmcontroller.Register(ctx, namespace, objectSetApply,
+	helmcontroller.Register(ctx, objectSetApply,
 		helms.Helm().V1().HelmChart(),
 		batches.Batch().V1().Job(),
 		rbacs.Rbac().V1().ClusterRoleBinding(),

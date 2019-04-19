@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: helm-controller
+  namespace: kube-system
+spec:
+  containers:
+    - name: helm-controller
+      image: rancher/helm-controller:dev
+      args: ["--threads", "2"]
